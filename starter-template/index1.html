@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+  <meta name="generator" content="Jekyll v4.0.1">
+  <title>Starter Template · Bootstrap</title>
+
+  <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/starter-template/">
+
+  <!-- Bootstrap core CSS -->
+  <link href="../assets/dist/css/bootstrap.css" rel="stylesheet">
+
+  <style>
+    .bd-placeholder-img {
+      font-size: 1.125rem;
+      text-anchor: middle;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+
+    @media (min-width: 768px) {
+      .bd-placeholder-img-lg {
+        font-size: 3.5rem;
+      }
+    }
+  </style>
+  <!-- Custom styles for this template -->
+  <link href="starter-template.css" rel="stylesheet">
+</head>
+
+<body>
+  <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">Navbar</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault"
+      aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item active">
+          <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Link</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="dropdown01" data-toggle="dropdown" aria-haspopup="true"
+            aria-expanded="false">Dropdown</a>
+          <div class="dropdown-menu" aria-labelledby="dropdown01">
+            <a class="dropdown-item" href="#">Action</a>
+            <a class="dropdown-item" href="#">Another action</a>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </div>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+        <button class="btn btn-secondary my-2 my-sm-0" type="submit">Search</button>
+      </form>
+    </div>
+  </nav>
+
+  <main role="main" class="container">
+
+    <div class="image-cropper">
+        <input type="file" id="imageLoader" name="imageLoader"/>
+        <div class="error">Invalid file.  Needs to be at least 100x100 pixels.</div>
+        <div class="clearfix">
+        <div class="canvasCon">
+            <canvas id="imageCanvas" width="600" height="600"></canvas>
+            <div class="canvasScreenTop"></div>
+            <div class="canvasScreenBottom"></div>
+            <div class="canvasScreenLeft"></div>
+            <div class="canvasScreenRight"></div>
+            
+        </div>
+            <div class="cropResult"><img width="600" height="600"/></div></div>
+        <canvas id="cropCanvas" width="600" height="600"></canvas>
+        </div>
+        <div class="toolbar">
+                <div class="instructions">Click and drag to move.  Hold shift key to scale.</div>
+                <button id="crop">Crop</button>
+                <button id="reset">Reset</button>
+            </div>
+
+
+
+  </main><!-- /.container -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
+    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
+    crossorigin="anonymous"></script>
+  <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
+  <script src="../assets/dist/js/bootstrap.bundle.js"></script>
+  <script>
+      $(function() {
+    // properties
+    var isCaptured = false;
+    var thumbSize = 100;
+    var imageCoords = {
+        x: 0,
+        y: 0
+    };
+    var imageScale = 1;
+    var imageDimensions = {
+        width: 0,
+        height: 0,
+        minScale: 0.01,
+        maxScale: 1
+    }
+    var currentImage = null;
+    var originalSettings = {
+        coords: {
+            x: 0,
+            y: 0,
+        },
+        scale: 1,
+        dimensions: {
+            width: 0,
+            height: 0,
+            minimum: thumbSize
+        }
+    };
+    var scaleCenter = {
+        x: 0,
+        y: 0
+    };
+    var grabCenter = false;
+    var isShiftKeyDown = false;
+
+    // dom dependencies
+    var canvas = document.getElementById('imageCanvas');
+    var ctx = canvas.getContext('2d');
+    var canCon = $('.canvasCon');
+
+    // methods
+    function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    function refreshImage() {
+        clearCanvas();
+        boxed();
+        ctx.drawImage(currentImage,
+            imageCoords.x, imageCoords.y,
+            imageDimensions.width * imageScale, imageDimensions.height * imageScale);
+    }
+    function resetImage() {
+        if (!currentImage) return;
+        imageDimensions.width = originalSettings.dimensions.width;
+        imageDimensions.height = originalSettings.dimensions.height;
+        imageScale = originalSettings.scale;
+        imageCoords.x = originalSettings.coords.x;
+        imageCoords.y = originalSettings.coords.y;
+
+        refreshImage();
+    }
+    function handleImage(e){
+        var reader = new FileReader();
+        reader.onload = function(event){
+            currentImage = new Image();
+            currentImage.onload = function(){
+                imageCoords.x = 0;
+                imageCoords.y = 0;
+                originalSettings.dimensions.width = currentImage.width;
+                imageDimensions.width = currentImage.width;
+                originalSettings.dimensions.height = currentImage.height;
+                imageDimensions.height = currentImage.height;
+                var maxDim = Math.max(imageDimensions.height, imageDimensions.width);
+                var minDim = originalSettings.dimensions.minimum =  Math.min(imageDimensions.height, imageDimensions.width);
+                var op = (minDim < thumbSize) ? "show" : "hide";
+                $('.error')[op]();
+                if (minDim < thumbSize) {
+                    canCon.hide();
+                    $('#reset,#crop,.instructions,.cropResult').hide();
+                    return;
+                }
+                imageScale = 1;
+                originalSettings.dimensions.scale = 1;
+                imageDimensions.maxScale = 1;
+                if (maxDim > canvas.width) {
+                    imageScale =
+                    originalSettings.dimensions.scale = canvas.width / maxDim;
+                }
+                imageDimensions.minScale = thumbSize / minDim;
+                boxed();
+                // center image
+                var above = thumbSize - imageCoords.y;
+                var below = imageCoords.y + (imageDimensions.height * imageScale) - (thumbSize * 2);
+                var overlap = (above + below) / 2;
+                
+                imageCoords.y += (above - overlap);
+                
+                above = thumbSize - imageCoords.x;
+                below = imageCoords.x + (imageDimensions.width * imageScale) - (thumbSize * 2);
+                overlap = (above + below) / 2;
+                
+                imageCoords.x += (above - overlap);
+
+                canCon.show();
+                $('#reset,#crop,.instructions').show();
+                refreshImage();
+            }
+            currentImage.src = event.target.result;
+        }
+        reader.readAsDataURL(e.target.files[0]);     
+    }
+    function startScaling(newPoint, scale) {
+        scaleCenter.y = imageCoords.y + ((originalSettings.dimensions.height * scale) / 2);        
+        scaleCenter.x = imageCoords.x + ((originalSettings.dimensions.width * scale) / 2);
+        grabCenter = false;
+    }
+    function scaleByCenter(coords, scale) {
+        coords.y = scaleCenter.y - ((originalSettings.dimensions.height * scale) / 2);
+        coords.x = scaleCenter.x - ((originalSettings.dimensions.width * scale) / 2);
+    }
+    // referee who makes sure the image is in the box
+    function boxed() {
+        imageCoords.x = Math.min(thumbSize,imageCoords.x);
+        imageCoords.y = Math.min(thumbSize,imageCoords.y);
+        
+        imageCoords.x = Math.max(imageCoords.x, (thumbSize * 2) - (imageDimensions.width * imageScale));
+        imageCoords.y = Math.max(imageCoords.y, (thumbSize * 2) - (imageDimensions.height * imageScale));
+    }
+
+    // event handlers
+    $('#imageLoader').on('change', handleImage);
+    $('#crop').click(function(e) {
+        e.preventDefault();
+        if (!currentImage) return;        
+        var cropCanvas = $('#cropCanvas').get(0);
+        cropCanvas.getContext('2d').drawImage(canvas,
+            thumbSize, thumbSize, thumbSize, thumbSize,
+            0, 0, thumbSize, thumbSize);
+        var newPhotoUri = cropCanvas.toDataURL('image/jpeg');
+        $('.cropResult img').attr('src', newPhotoUri);
+        $('.cropResult').show();
+    });
+    $('#reset').click(function(e) {
+        e.preventDefault();
+        resetImage();
+    });
+    $(document).bind('keyup keydown', function (e) {
+        isShiftKeyDown = e.shiftKey;
+        if (isShiftKeyDown) {
+            canCon.css('cursor', 'ns-resize');
+            if (isCaptured) {
+                grabCenter = true;
+            }
+        } else {
+            canCon.css('cursor', 'move');
+        }
+    });
+    canCon.on('selectstart', false).on("mousedown.cropper", function (e) {
+        var originalPoint = {
+            x: e.clientX,
+            y: e.clientY
+        };
+        var originalCoords = {
+            x: imageCoords.x,
+            y: imageCoords.y,
+            scale: imageScale
+        };
+        if (isShiftKeyDown) {
+           startScaling(originalPoint, imageScale);
+        }
+        grabCenter = false;
+        var originalScale = imageScale;
+        isCaptured = true;
+        $(document).on('mousemove.cropper', function (e) {
+            var newPoint = {
+                x: e.clientX,
+                y: e.clientY
+            };
+            if (grabCenter) {
+                startScaling(newPoint, imageScale);
+            }
+            var delta = {
+                x: newPoint.x - originalPoint.x,
+                y: newPoint.y - originalPoint.y
+            };
+
+            if (isShiftKeyDown) {
+                var moveScale = Math.max(-0.08, -0.000001 * Math.pow(originalCoords.scale * originalSettings.dimensions.minimum, 1.7));
+                imageScale = Math.max(imageDimensions.minScale, Math.min(imageDimensions.maxScale, originalScale + (delta.y * moveScale)));
+                console.log('cur='+imageScale);
+                console.log('min,max='+imageDimensions.minScale+','+imageDimensions.maxScale);
+                scaleByCenter(imageCoords, imageScale);
+            } else {
+                imageCoords.x = originalCoords.x + delta.x;
+                imageCoords.y = originalCoords.y + delta.y;
+            }
+            refreshImage();
+        }).on('mouseup.cropper', function (e) {
+            isCaptured = false;
+            $(document).off('mousemove.cropper').off('mouseup.cropper');
+            refreshImage();
+        });
+    });
+});
+
+  </script>
+
+
+</body>
+
+</html>

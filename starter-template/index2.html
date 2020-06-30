@@ -10,7 +10,10 @@
   <title>Starter Template · Bootstrap</title>
 
   <link rel="canonical" href="https://getbootstrap.com/docs/4.5/examples/starter-template/">
-
+  <script src="../node_modules/jquery/dist/jquery.js"></script><!-- jQuery is required -->
+  <script src="../node_modules/cropperjs/dist/cropper.js"></script><!-- Cropper.js is required -->
+  <link  href="../node_modules/cropperjs/dist/cropper.css" rel="stylesheet">
+  <script src="../node_modules/jquery-cropper/dist/jquery-cropper.js"></script>
   <!-- Bootstrap core CSS -->
   <link href="../assets/dist/css/bootstrap.css" rel="stylesheet">
 
@@ -71,54 +74,34 @@
   </nav>
 
   <main role="main" class="container">
-
-    <div class="starter-template">
-      <h1>Bootstrap starter template</h1>
-      <p class="lead">Use this document as a way to quickly start any new project.<br> All you get is this text and a
-        mostly barebones HTML document.</p>
-    </div>
     <div class="container">
-      <!-- Button trigger modal -->
-      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
-        Launch demo modal
-      </button>
-
-
-      <!-- Modal -->
-      <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-              </button>
-            </div>
-            <div class="modal-body">
-              <div class="cover-picture-wrapper center-block">
-                  <img src="../images/download.jfif" class="img-fluid cover-photo" alt="Responsive image">
-                  <p>Source: https://pqina.nl/blog/presenting-images-in-an-aspect-ratio-with-css/</p>
-                </div>
-             
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-              <button type="button" class="btn btn-primary">Save changes</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-
-
+    <img  id="image" src="../images/cover-photo.jpg" class="img-fluid cover-photo_cropperjs" alt="Responsive image">
     </div>
   </main><!-- /.container -->
-  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-    integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-    crossorigin="anonymous"></script>
-  <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script>
-  <script src="../assets/dist/js/bootstrap.bundle.js"></script>
+  
+
+
 </body>
 
 </html>
+
+<script>
+var $image = $('#image');
+
+$image.cropper({
+  aspectRatio: 30/7,
+  crop: function(event) {
+    console.log("x-coordinate : "+event.detail.x);
+    console.log("y-coordinate : "+event.detail.y);
+    console.log("width : "+event.detail.width);
+    console.log("height : "+event.detail.height);
+    console.log("rotate : "+event.detail.rotate);
+    console.log("xscale : "+event.detail.scaleX);
+    console.log("yscale : "+event.detail.scaleY);
+  }
+});
+
+// Get the Cropper.js instance after initialized
+var cropper = $image.data('cropper');
+
+</script>
