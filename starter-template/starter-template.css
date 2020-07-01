@@ -147,3 +147,16 @@ clear: both;
   height: auto;
 }
 
+/* .cropper-move{
+  width: 1200px !important;
+  height: 280px !important;
+} */
+
+/* https://github.com/fengyuanchen/cropperjs/tree/master/docs/examples */
+
+
+.crop-preview {
+  overflow: hidden;
+  width: 1200px; 
+  height: 280px;
+}
